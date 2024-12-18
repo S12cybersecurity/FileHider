@@ -2,4 +2,7 @@
 C:\Users\s12\Documents\GitHub\CPPClasses\File Management\FileHide\FileHide\UHideFileClass.h(72,70): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
   (compiling source file 'FileHide.cpp')
   
+C:\Users\s12\Documents\GitHub\CPPClasses\File Management\FileHide\FileHide\UHideFileClass.h(191,29): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  (compiling source file 'FileHide.cpp')
+  
   FileHide.vcxproj -> C:\Users\s12\Documents\GitHub\CPPClasses\File Management\FileHide\x64\Debug\FileHide.exe

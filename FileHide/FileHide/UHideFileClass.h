@@ -122,7 +122,7 @@ public:
     }
 
 
-    void encryptFileWithXOR(const char* fileName) {
+    void encryptFileWithXOR(const char* fileName, char xorKey) {
         FILE* file = fopen(fileName, "rb+");
         if (file == NULL) {
             perror("Error opening the file for encryption");
@@ -141,7 +141,7 @@ public:
 
         fread(buffer, 1, fileSize, file);
 
-        char xorKey = 'S';
+        //char xorKey = 'S';
         for (long i = 0; i < fileSize; ++i) {
             buffer[i] ^= xorKey;
         }
@@ -187,9 +187,15 @@ public:
         fclose(file);
     }
 
-    bool hideFragmentedEncryptedFile(const std::string& sourceFile, const std::string& destinationFile, const std::string& adsName, int numChunks) {
+    char generateDynamicKey() {
+        std::srand(std::time(0));
+        return static_cast<char>(std::rand() % 256); // Generate a random number between 0 and 255
+    }
+
+    char hideFragmentedEncryptedFile(const std::string& sourceFile, const std::string& destinationFile, const std::string& adsName, int numChunks) {
         // Step 1: Encrypt the File
-        encryptFileWithXOR(sourceFile.c_str());
+        char key = generateDynamicKey();
+        encryptFileWithXOR(sourceFile.c_str(), key);
 
         // Step 2: Split the File
         splitFile(sourceFile.c_str(), numChunks);
@@ -221,7 +227,6 @@ public:
 
             fclose(chunk);
             fclose(ads);
-
             remove(chunkName);
         }
 
@@ -231,11 +236,11 @@ public:
             return false;
         }
 
-        return true;
+        return key;
     }
 
 
-    bool restoreFragmentedEncryptedFile(const std::string& sourceFile, const std::string& destinationFile, const std::string& adsBaseName, int numChunks) {
+    bool restoreFragmentedEncryptedFile(const std::string& sourceFile, const std::string& destinationFile, const std::string& adsBaseName, int numChunks, char xorKey) {
         // Open the destination file for writing
         FILE* destFile = fopen(destinationFile.c_str(), "wb");
         if (destFile == NULL) {
@@ -270,7 +275,13 @@ public:
         fclose(destFile);
 
         // Decrypt the restored file
-        encryptFileWithXOR(destinationFile.c_str());
+        encryptFileWithXOR(destinationFile.c_str(), xorKey);
+
+        // Remove the ADS fragments
+		for (int i = 0; i < numChunks; ++i) {
+			std::string adsPath = sourceFile + ":" + adsBaseName + std::to_string(i + 1);
+			remove(adsPath.c_str());
+		}
 
         return true;
     }
